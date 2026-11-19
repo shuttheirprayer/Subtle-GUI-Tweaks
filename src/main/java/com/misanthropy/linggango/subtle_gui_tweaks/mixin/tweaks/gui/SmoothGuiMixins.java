@@ -723,7 +723,7 @@ public class SmoothGuiMixins {
             }
             subtle_gui_tweaks$lastCarried = carried;
 
-            ItemStack hovered = carried.isEmpty() && this.hoveredSlot != null ? this.hoveredSlot.getItem() : ItemStack.EMPTY;
+            ItemStack hovered = carried.isEmpty() && this.hoveredSlot != null ? subtle_gui_tweaks$safeItem(this.hoveredSlot) : ItemStack.EMPTY;
             if (!ItemStack.isSameItemSameTags(hovered, subtle_gui_tweaks$hoverMatch)) {
                 subtle_gui_tweaks$hoverMatchAt = time;
             }
@@ -731,6 +731,15 @@ public class SmoothGuiMixins {
 
             subtle_gui_tweaks$detectOutputChanges(time);
             subtle_gui_tweaks$trackSpreadSlots(time);
+        }
+
+        @Unique
+        private static ItemStack subtle_gui_tweaks$safeItem(Slot slot) {
+            try {
+                return slot.getItem();
+            } catch (RuntimeException e) {
+                return ItemStack.EMPTY;
+            }
         }
 
         @Unique
@@ -763,7 +772,7 @@ public class SmoothGuiMixins {
 
             for (int i = 0; i < size; i++) {
                 Slot slot = this.menu.slots.get(i);
-                ItemStack stack = slot.getItem();
+                ItemStack stack = subtle_gui_tweaks$safeItem(slot);
                 Item item = stack.isEmpty() ? null : stack.getItem();
                 int count = stack.getCount();
 
@@ -853,7 +862,7 @@ public class SmoothGuiMixins {
             ItemStack carried = this.menu.getCarried();
             boolean carrying = !carried.isEmpty();
             ItemStack reference = carrying ? carried : subtle_gui_tweaks$hoverMatch;
-            if (reference.isEmpty() || slot == subtle_gui_tweaks$previousHoveredSlot || !ItemStack.isSameItemSameTags(slot.getItem(), reference)) {
+            if (reference.isEmpty() || slot == subtle_gui_tweaks$previousHoveredSlot || !ItemStack.isSameItemSameTags(subtle_gui_tweaks$safeItem(slot), reference)) {
                 return 0.0F;
             }
 
